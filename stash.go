@@ -12,6 +12,10 @@ var (
 	CRLF = []byte{13, 10}
 )
 
+func addCRLF(data []byte) []byte {
+	return append(data, CRLF...)
+}
+
 type Stash struct {
 	conn         net.Conn
 	bw           *bufio.Writer
@@ -97,7 +101,7 @@ func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
 		o.writeTimeout = 5
 	}
 
-	conn, err := net.Dial("tcp", s.address)
+	conn, err := o.dialer.Dial("tcp", s.address)
 
 	if err != nil {
 		return nil, err
@@ -133,18 +137,18 @@ func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
 	s.br = bufio.NewReader(s.conn)
 	s.readTimeout = o.readTimeout
 	s.writeTimeout = o.writeTimeout
-	fmt.Println(s.conn.RemoteAddr())
 	return s, nil
 }
 
 // Write function, implement from io.Writer
 func (s *Stash) Write(data []byte) (int, error) {
 	if s.writeTimeout != 0 {
-		s.conn.SetWriteDeadline(time.Now().Add(s.writeTimeout * time.Millisecond))
+		deadline := time.Now().Add(s.writeTimeout * time.Millisecond)
+		s.conn.SetWriteDeadline(deadline)
 	}
 
-	s.bw.Write(data)
-	_, err := s.bw.Write(CRLF)
+	data = addCRLF(data)
+	_, err := s.bw.Write(data)
 	if err != nil {
 		return 0, err
 	}
