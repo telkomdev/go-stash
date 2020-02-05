@@ -79,6 +79,7 @@ func SetTLSConfig(config *tls.Config) Option {
 	}
 }
 
+// Connect function, this function will connect to logstash server
 func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
 	address := fmt.Sprintf("%s:%d", host, port)
 
