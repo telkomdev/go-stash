@@ -28,9 +28,16 @@ func main() {
 		log.Fatalf("server: loadkeys: %s", err)
 		os.Exit(1)
 	}
+
+	// InsecureSkipVerify: true if CA you are using self signed SSL
 	config := tls.Config{Certificates: []tls.Certificate{cert}, InsecureSkipVerify: true}
 
-	s, err := stash.Connect("localhost", 5000, stash.SetTLSConfig(&config), stash.SetTLS(true))
+	var (
+		host string = "localhost"
+		port uint64 = 5000
+	)
+
+	s, err := stash.Connect(host, port, stash.SetTLSConfig(&config), stash.SetTLS(true))
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
