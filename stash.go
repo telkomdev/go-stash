@@ -2,6 +2,7 @@ package stash
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/tls"
 	"fmt"
 	"net"
@@ -147,6 +148,8 @@ func (s *Stash) Write(data []byte) (int, error) {
 		deadline := time.Now().Add(s.writeTimeout * time.Millisecond)
 		s.conn.SetWriteDeadline(deadline)
 	}
+
+	data = bytes.Trim(data, string(CRLF))
 
 	data = addCRLF(data)
 	_, err := s.bw.Write(data)
