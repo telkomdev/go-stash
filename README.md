@@ -2,6 +2,8 @@
 
 Logstash Client Library For Go
 
+[![GoDoc](https://godoc.org/github.com/telkomdev/go-stash?status.svg)](https://godoc.org/github.com/telkomdev/go-stash)
+
 ### Getting started
 
 Install
