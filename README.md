@@ -37,8 +37,8 @@ type Log struct {
 }
 
 func main() {
-    host := "localhost"
-    port := 5000
+    var host string = "localhost"
+	var port uint64 = 5000
 	s, err := stash.Connect(host, port)
 	if err != nil {
 		fmt.Println(err)
@@ -76,7 +76,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-    "log"
+	"log"
 	"os"
 	"time"
 
@@ -94,8 +94,8 @@ type Log struct {
 }
 
 func main() {
-    host := "localhost"
-    port := 5000
+	var host string = "localhost"
+	var port uint64 = 5000
 	s, err := stash.Connect(host, port)
 	if err != nil {
 		fmt.Println(err)
@@ -106,19 +106,19 @@ func main() {
 		s.Close()
 	}()
 
-    logger := log.New(s, "", 0)
+	logger := log.New(s, "", 0)
 
 	logData := Log{
-			Action: "get_me",
-			Time:   time.Now(),
-			Message: Message{
-				Data: "get me for me",
-			},
-		}
+		Action: "get_me",
+		Time:   time.Now(),
+		Message: Message{
+			Data: "get me for me",
+		},
+	}
 
-    logDataJSON, _ := json.Marshal(logData)
+	logDataJSON, _ := json.Marshal(logData)
 
-    logger.Print(string(logDataJSON))
+	logger.Print(string(logDataJSON))
 
 }
 
