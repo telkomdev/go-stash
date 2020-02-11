@@ -123,3 +123,31 @@ func main() {
 }
 
 ```
+
+### TLS
+```go
+func main() {
+	cert, err := tls.LoadX509KeyPair("certs/server.crt", "certs/server.key")
+	if err != nil {
+		log.Fatalf("server: loadkeys: %s", err)
+		os.Exit(1)
+	}
+	config := tls.Config{Certificates: []tls.Certificate{cert}}
+
+	var (
+		host string = "localhost"
+		port uint64 = 5000
+	)
+
+	s, err := stash.Connect(host, port, stash.SetTLSConfig(&config), stash.SetTLS(true))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	defer func() {
+		s.Close()
+	}()
+
+	logger := log.New(s, "", 0)
+```
