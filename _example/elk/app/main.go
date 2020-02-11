@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -31,11 +32,14 @@ func main() {
 		s.Close()
 	}()
 
-	http.HandleFunc("/", HelloServer(s))
+	logger := log.New(s, "", 0)
+
+	http.HandleFunc("/", Hello(s))
+	http.HandleFunc("/log", HelloWithLog(logger))
 	http.ListenAndServe(":8080", nil)
 }
 
-func HelloServer(s *stash.Stash) func(http.ResponseWriter, *http.Request) {
+func Hello(s *stash.Stash) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		logData := Log{
 			Action: "get_me",
@@ -54,5 +58,23 @@ func HelloServer(s *stash.Stash) func(http.ResponseWriter, *http.Request) {
 		}
 
 		fmt.Fprintf(w, "message write count %d!", n)
+	}
+}
+
+func HelloWithLog(l *log.Logger) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		logData := Log{
+			Action: "get_me",
+			Time:   time.Now(),
+			Message: Message{
+				Data: "get me for me",
+			},
+		}
+
+		logDataJSON, _ := json.Marshal(logData)
+
+		l.Print(string(logDataJSON))
+
+		fmt.Fprintf(w, "message to log %d!", 0)
 	}
 }
