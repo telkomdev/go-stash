@@ -11,16 +11,6 @@ import (
 	"github.com/telkomdev/go-stash"
 )
 
-type Message struct {
-	Data string `json:"data"`
-}
-
-type Log struct {
-	Action  string    `json:"action"`
-	Time    time.Time `json:"time"`
-	Message Message   `json:"message"`
-}
-
 func main() {
 	cert, err := tls.LoadX509KeyPair("certs/server.crt", "certs/server.key")
 	if err != nil {
