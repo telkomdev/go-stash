@@ -10,6 +10,8 @@ import (
 )
 
 var (
+
+	// CRLF (Carriage Return and Line Feed in ASCII code)
 	CRLF = []byte{13, 10}
 )
 
@@ -17,6 +19,7 @@ func addCRLF(data []byte) []byte {
 	return append(data, CRLF...)
 }
 
+// Stash structure
 type Stash struct {
 	conn         net.Conn
 	bw           *bufio.Writer
@@ -109,6 +112,8 @@ func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
 		return nil, err
 	}
 
+	// if useTLS true
+	// Force stash to use TLS
 	if o.useTLS {
 		var tlsConfig *tls.Config
 		if o.tlsConfig == nil {
@@ -131,6 +136,8 @@ func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
 			conn.Close()
 			return nil, err
 		}
+
+		// replace current Conn object with tlsConn
 		conn = tlsConn
 	}
 
@@ -149,9 +156,14 @@ func (s *Stash) Write(data []byte) (int, error) {
 		s.conn.SetWriteDeadline(deadline)
 	}
 
+	// remove any Carriage Return or Line Feed in bytes data
+	// before concate with new Carriage Return or Line Feed
 	data = bytes.Trim(data, string(CRLF))
 
+	// concate with new Carriage Return or Line Feed
 	data = addCRLF(data)
+
+	// write data to Connection
 	_, err := s.bw.Write(data)
 	if err != nil {
 		return 0, err
