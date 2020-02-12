@@ -13,9 +13,9 @@ Logstash Client Library For Go
 
 ### Example
 
-- [Basic](###basic)
-- [With Golang's Standar Log](###with-Golang's-standar-log)
-- [TLS](###tls-to-secure-your-connection)
+- [Basic](#basic)
+- [With Golang's Standar Log](#with-Golang's-standar-log)
+- [TLS](#tls-to-secure-your-connection)
 
 ### Getting started
 
