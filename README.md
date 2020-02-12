@@ -6,7 +6,7 @@ Logstash Client Library For Go
 
 ### Feature
 
-- Support TLS
+- Support `TLS` https://en.wikipedia.org/wiki/Transport_Layer_Security
 - Support Golang's standar `Log` https://golang.org/pkg/log/
 - Support `Logrus` https://github.com/sirupsen/logrus
 
@@ -134,7 +134,7 @@ func main() {
 ```
 
 ### TLS
-Sometime you have to secure your communication between your `Logstash` and your client
+Sometimes you have to secure your communication between your `Logstash` and your client
 
 ```go
 func main() {
