@@ -4,6 +4,12 @@ Logstash Client Library For Go
 
 [![GoDoc](https://godoc.org/github.com/telkomdev/go-stash?status.svg)](https://godoc.org/github.com/telkomdev/go-stash)
 
+### Feature
+
+- Support TLS
+- Support Golang's standar `Log` https://golang.org/pkg/log/
+- Support `Logrus` https://github.com/sirupsen/logrus
+
 ### Getting started
 
 Install
@@ -16,6 +22,7 @@ $ go get github.com/telkomdev/go-stash
 Usage
 
 <b>Basic</b>
+
 ```go
 package main
 
@@ -127,6 +134,8 @@ func main() {
 ```
 
 ### TLS
+Sometime you have to secure your communication between your `Logstash` and your client
+
 ```go
 func main() {
 	cert, err := tls.LoadX509KeyPair("certs/server.crt", "certs/server.key")
