@@ -14,7 +14,7 @@ Logstash Client Library For Go
 ### Example
 
 - [Basic](#basic)
-- [With Golang's Standar Log](#with-golang's-standar-log)
+- [With Golang's Standar Log](#with-golang-is-standar-log)
 - [TLS](#tls-to-secure-your-connection)
 
 ### Getting started
@@ -84,7 +84,7 @@ func main() {
 
 ```
 
-### With Golang's Standar Log
+### With Golang is Standar Log
 You can use `go-stash` With Golang's standar Log
 
 ```go
