@@ -18,7 +18,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	// InsecureSkipVerify: true if CA you are using self signed SSL
+	// InsecureSkipVerify: true
+	// if CA you are using is a self signed SSL
 	config := tls.Config{Certificates: []tls.Certificate{cert}, InsecureSkipVerify: true}
 
 	var (
