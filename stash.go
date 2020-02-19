@@ -157,7 +157,7 @@ func (s *Stash) Write(data []byte) (int, error) {
 	}
 
 	// remove any Carriage Return or Line Feed in bytes data
-	// before concate with new Carriage Return or Line Feed
+	// before concate with new Carriage Return and Line Feed
 	data = bytes.Trim(data, string(CRLF))
 
 	// concate with new Carriage Return or Line Feed
