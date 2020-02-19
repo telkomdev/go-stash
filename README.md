@@ -17,18 +17,17 @@ Logstash Client Library For Go
 - [With Golang's Standar Log](#with-golang-is-standar-log)
 - [TLS](#tls-to-secure-your-connection)
 
-### Getting started
 
-Install
+### Install
 
 ```shell
 $ go get github.com/telkomdev/go-stash
 ```
 
 
-Usage
+### Usage
 
-### Basic
+#### Basic
 
 ```go
 package main
@@ -84,7 +83,7 @@ func main() {
 
 ```
 
-### With Golang is Standar Log
+#### With Golang is Standar Log
 You can use `go-stash` With Golang's standar Log
 
 ```go
@@ -141,7 +140,7 @@ func main() {
 
 ```
 
-### TLS to secure your connection
+#### TLS to secure your connection
 Sometimes you have to secure your communication between your `Logstash` and your client
 
 ```go
