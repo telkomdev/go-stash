@@ -1,8 +1,12 @@
-## Go Stash
-
+<div align="center">
+<h2>Go Stash</h2>
 Logstash Client Library For Go
 
+[<img src="./assets/logo.png" width="300">](https://github.com/telkomdev/go-stash)
+<br/><br/>
+
 [![GoDoc](https://godoc.org/github.com/telkomdev/go-stash?status.svg)](https://godoc.org/github.com/telkomdev/go-stash)
+</div>
 
 ### Features
 
