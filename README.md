@@ -6,7 +6,7 @@ Logstash Client Library For Go
 <br/><br/>
 
 [![GoDoc](https://godoc.org/github.com/telkomdev/go-stash?status.svg)](https://godoc.org/github.com/telkomdev/go-stash)
-</div>
+
 [![Go Report Card](https://goreportcard.com/badge/github.com/telkomdev/go-stash)](https://goreportcard.com/report/github.com/telkomdev/go-stash)
 </div>
 
