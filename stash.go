@@ -99,11 +99,11 @@ func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
 	}
 
 	if o.readTimeout == 0 {
-		o.readTimeout = 5
+		o.readTimeout = (1 * time.Minute)
 	}
 
 	if o.writeTimeout == 0 {
-		o.writeTimeout = 5
+		o.writeTimeout = (1 * time.Minute)
 	}
 
 	conn, err := o.dialer.Dial("tcp", s.address)
@@ -152,7 +152,7 @@ func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
 // Write function, implement from io.Writer
 func (s *Stash) Write(data []byte) (int, error) {
 	if s.writeTimeout != 0 {
-		deadline := time.Now().Add(s.writeTimeout * time.Millisecond)
+		deadline := time.Now().Add(s.writeTimeout)
 		s.conn.SetWriteDeadline(deadline)
 	}
 
