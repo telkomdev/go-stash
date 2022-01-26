@@ -21,24 +21,20 @@ func addCRLF(data []byte) []byte {
 
 // Stash structure
 type Stash struct {
-	conn         net.Conn
-	bw           *bufio.Writer
-	br           *bufio.Reader
-	readTimeout  time.Duration
-	writeTimeout time.Duration
-	address      string
+	conn    net.Conn
+	bw      *bufio.Writer
+	br      *bufio.Reader
+	address string
 }
 
 // Option function
 type Option func(*options)
 
 type options struct {
-	dialer       *net.Dialer
-	useTLS       bool
-	skipVerify   bool
-	readTimeout  time.Duration
-	writeTimeout time.Duration
-	tlsConfig    *tls.Config
+	dialer     *net.Dialer
+	useTLS     bool
+	skipVerify bool
+	tlsConfig  *tls.Config
 }
 
 // SetTLS Option func
@@ -52,20 +48,6 @@ func SetTLS(useTLS bool) Option {
 func SetSkipVerify(skipVerify bool) Option {
 	return func(o *options) {
 		o.skipVerify = skipVerify
-	}
-}
-
-// SetReadTimeout Option func
-func SetReadTimeout(readTimeout time.Duration) Option {
-	return func(o *options) {
-		o.readTimeout = readTimeout
-	}
-}
-
-// SetWriteTimeout Option func
-func SetWriteTimeout(writeTimeout time.Duration) Option {
-	return func(o *options) {
-		o.readTimeout = writeTimeout
 	}
 }
 
@@ -96,14 +78,6 @@ func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
 	}
 	for _, option := range opts {
 		option(o)
-	}
-
-	if o.readTimeout == 0 {
-		o.readTimeout = 5
-	}
-
-	if o.writeTimeout == 0 {
-		o.writeTimeout = 5
 	}
 
 	conn, err := o.dialer.Dial("tcp", s.address)
@@ -144,17 +118,11 @@ func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
 	s.conn = conn
 	s.bw = bufio.NewWriter(s.conn)
 	s.br = bufio.NewReader(s.conn)
-	s.readTimeout = o.readTimeout
-	s.writeTimeout = o.writeTimeout
 	return s, nil
 }
 
 // Write function, implement from io.Writer
 func (s *Stash) Write(data []byte) (int, error) {
-	if s.writeTimeout != 0 {
-		deadline := time.Now().Add(s.writeTimeout * time.Millisecond)
-		s.conn.SetWriteDeadline(deadline)
-	}
 
 	// remove any Carriage Return or Line Feed in bytes data
 	// before concate with new Carriage Return and Line Feed
