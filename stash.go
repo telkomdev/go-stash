@@ -1,7 +1,6 @@
 package stash
 
 import (
-	"bufio"
 	"bytes"
 	"crypto/tls"
 	"fmt"
@@ -22,8 +21,6 @@ func addCRLF(data []byte) []byte {
 // Stash structure
 type Stash struct {
 	conn         net.Conn
-	bw           *bufio.Writer
-	br           *bufio.Reader
 	readTimeout  time.Duration
 	writeTimeout time.Duration
 	address      string
@@ -98,16 +95,12 @@ func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
 		option(o)
 	}
 
-	if o.readTimeout == 0 {
-		o.readTimeout = (1 * time.Minute)
+	addr, err := net.ResolveTCPAddr("tcp", address)
+	if err != nil {
+		return nil, err
 	}
 
-	if o.writeTimeout == 0 {
-		o.writeTimeout = (1 * time.Minute)
-	}
-
-	conn, err := o.dialer.Dial("tcp", s.address)
-
+	conn, err := net.DialTCP("tcp", nil, addr)
 	if err != nil {
 		return nil, err
 	}
@@ -138,12 +131,10 @@ func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
 		}
 
 		// replace current Conn object with tlsConn
-		conn = tlsConn
+		s.conn = tlsConn
 	}
 
 	s.conn = conn
-	s.bw = bufio.NewWriter(s.conn)
-	s.br = bufio.NewReader(s.conn)
 	s.readTimeout = o.readTimeout
 	s.writeTimeout = o.writeTimeout
 	return s, nil
@@ -164,11 +155,10 @@ func (s *Stash) Write(data []byte) (int, error) {
 	data = addCRLF(data)
 
 	// write data to Connection
-	_, err := s.bw.Write(data)
+	_, err := s.conn.Write(data)
 	if err != nil {
 		return 0, err
 	}
-	s.bw.Flush()
 	return len(data), nil
 }
 
