@@ -105,6 +105,8 @@ func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
 		return nil, err
 	}
 
+	s.conn = conn
+
 	// if useTLS true
 	// Force stash to use TLS
 	if o.useTLS {
@@ -134,7 +136,6 @@ func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
 		s.conn = tlsConn
 	}
 
-	s.conn = conn
 	s.readTimeout = o.readTimeout
 	s.writeTimeout = o.writeTimeout
 	return s, nil
