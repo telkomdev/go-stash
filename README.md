@@ -7,8 +7,6 @@ Logstash Client Library For Go
 
 [![GoDoc](https://godoc.org/github.com/telkomdev/go-stash?status.svg)](https://godoc.org/github.com/telkomdev/go-stash)
 [![Go Report Card](https://goreportcard.com/badge/github.com/telkomdev/go-stash)](https://goreportcard.com/report/github.com/telkomdev/go-stash)
-[![codecov](https://codecov.io/gh/lutfailham96/go-stash/branch/master/graph/badge.svg?token=01TY3OWGTN)](https://codecov.io/gh/lutfailham96/go-stash)
-[![Maintainability](https://api.codeclimate.com/v1/badges/eddcd4ce4bee5d1094d8/maintainability)](https://codeclimate.com/github/lutfailham96/go-stash/maintainability)
 </div>
 
 ### Features
