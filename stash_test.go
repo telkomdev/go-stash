@@ -1,9 +1,9 @@
 package stash
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"sync"
 	"testing"
@@ -24,10 +24,10 @@ func testConnection(t *testing.T, wg *sync.WaitGroup, host string, port uint64) 
 	defer wg.Done()
 
 	_, err := Connect(host, port)
-	if err != nil {
-		return
+	if err == nil {
+		t.Fatal(err)
 	}
-	t.Fatal(err)
+	return
 }
 
 func testWriteData(t *testing.T, wg *sync.WaitGroup, host string, port uint64, opts ...Option) {
@@ -36,7 +36,7 @@ func testWriteData(t *testing.T, wg *sync.WaitGroup, host string, port uint64, o
 	s, _ := Connect(host, port, opts...)
 	defer s.Close()
 
-	logData := Log{
+	data := Log{
 		Action: "get_me",
 		Time:   time.Now(),
 		Message: Message{
@@ -44,12 +44,13 @@ func testWriteData(t *testing.T, wg *sync.WaitGroup, host string, port uint64, o
 		},
 	}
 
-	logDataJSON, _ := json.Marshal(logData)
+	dataJSON, _ := json.Marshal(data)
 
-	_, err := s.Write(logDataJSON)
+	_, err := s.Write(dataJSON)
 	if err != nil {
 		t.Fatal("Cannot write message to host")
 	}
+	return
 }
 
 func testWriteInvalidData(t *testing.T, wg *sync.WaitGroup, host string, port uint64, opts ...Option) {
@@ -66,18 +67,33 @@ func testWriteInvalidData(t *testing.T, wg *sync.WaitGroup, host string, port ui
 	t.Fatal("Cannot write message to host")
 }
 
+func handleConnection(conn net.Conn) {
+	defer conn.Close()
+}
+
 func TestStash(t *testing.T) {
 	const host string = "localhost"
 	const listenPort uint64 = 5000
+	const secureListenPort = 5433
 	const invalidHost string = "localhostnet"
 	const invalidListenPort uint64 = 6000
 
-	// Start TCP handler
+	// Start TCP & TLS handler
 	l, err := net.Listen("tcp", fmt.Sprintf(":%d", listenPort))
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer l.Close()
+	cer, err := tls.LoadX509KeyPair("server.crt", "server.key")
+	if err != nil {
+		t.Fatal(err)
+	}
+	tlsConfig := &tls.Config{Certificates: []tls.Certificate{cer}}
+	ln, err := tls.Listen("tcp", fmt.Sprintf(":%d", secureListenPort), tlsConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ln.Close()
 
 	var wg sync.WaitGroup
 	wg.Add(4)
@@ -93,19 +109,23 @@ func TestStash(t *testing.T) {
 	}
 	go testWriteData(t, &wg, host, listenPort, opts...)
 	go testWriteInvalidData(t, &wg, host, listenPort, opts...)
+	tlsOpts := []Option{
+		SetTLS(true),
+		SetSkipVerify(false),
+		SetTLSConfig(tlsConfig),
+	}
+	go testWriteData(t, &wg, host, secureListenPort, tlsOpts...)
 	wg.Wait()
 
-	conn, err := l.Accept()
-	defer conn.Close()
+	// Handle TCP connection
 	for {
+		conn, err := l.Accept()
 		if err != nil {
+			t.Fatal(err)
 			return
 		}
 
-		_, err := ioutil.ReadAll(conn)
-		if err != nil {
-			t.Fatal(err)
-		}
+		go handleConnection(conn)
 
 		return
 	}
