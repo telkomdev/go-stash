@@ -20,7 +20,7 @@ type Log struct {
 	Message Message   `json:"message"`
 }
 
-func testConnection(t *testing.T, wg *sync.WaitGroup, host string, port uint64, opts ...Option) {
+func testConnection(t *testing.T, wg *sync.WaitGroup, host string, port uint64) {
 	defer wg.Done()
 
 	_, err := Connect(host, port)
@@ -52,6 +52,20 @@ func testWriteData(t *testing.T, wg *sync.WaitGroup, host string, port uint64, o
 	}
 }
 
+func testWriteInvalidData(t *testing.T, wg *sync.WaitGroup, host string, port uint64, opts ...Option) {
+	defer wg.Done()
+
+	s, _ := Connect(host, port, opts...)
+
+	// early close connection before write data
+	s.Close()
+	_, err := s.Write(make([]byte, 0))
+	if err != nil {
+		return
+	}
+	t.Fatal("Cannot write message to host")
+}
+
 func TestStash(t *testing.T) {
 	const host string = "localhost"
 	const listenPort uint64 = 5000
@@ -66,7 +80,7 @@ func TestStash(t *testing.T) {
 	defer l.Close()
 
 	var wg sync.WaitGroup
-	wg.Add(3)
+	wg.Add(4)
 	// Test invalid host
 	go testConnection(t, &wg, invalidHost, listenPort)
 	// Test invalid port
@@ -78,31 +92,19 @@ func TestStash(t *testing.T) {
 		SetWriteTimeout(time.Minute * 1),
 	}
 	go testWriteData(t, &wg, host, listenPort, opts...)
+	go testWriteInvalidData(t, &wg, host, listenPort, opts...)
 	wg.Wait()
 
+	conn, err := l.Accept()
+	defer conn.Close()
 	for {
-		conn, err := l.Accept()
 		if err != nil {
 			return
 		}
-		defer conn.Close()
 
-		buf, err := ioutil.ReadAll(conn)
+		_, err := ioutil.ReadAll(conn)
 		if err != nil {
 			t.Fatal(err)
-		}
-		respData := Log{
-			Action: "get_me",
-			Time:   time.Now(),
-			Message: Message{
-				Data: "get me for me",
-			},
-		}
-		reqData := Log{}
-		_ = json.Unmarshal(buf[:], &reqData)
-
-		if reqData.Message != respData.Message {
-			t.Fatalf("Unexpected message:\nGot:\t\t%s\nExpected:\t%s\n", respData.Message, reqData.Message)
 		}
 
 		return
