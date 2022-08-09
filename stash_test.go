@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
-	"os"
 	"testing"
 	"time"
 )
@@ -23,14 +22,30 @@ type Log struct {
 func TestStash(t *testing.T) {
 	const host string = "localhost"
 	const listenPort uint64 = 5000
+	const invalidHost string = "localhostnet"
+	const invalidListenPort uint64 = 6000
 	timeNow := time.Now()
 
+	// Test invalid host
 	go func() {
-		s, err := Connect(host, listenPort)
+		_, err := Connect(invalidHost, listenPort)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			return
 		}
+		t.Fatal(err)
+	}()
+
+	// Test invalid port
+	go func() {
+		_, err := Connect(host, invalidListenPort)
+		if err != nil {
+			return
+		}
+		t.Fatal(err)
+	}()
+
+	go func() {
+		s, _ := Connect(host, listenPort)
 		defer s.Close()
 
 		logData := Log{
@@ -43,7 +58,7 @@ func TestStash(t *testing.T) {
 
 		logDataJSON, _ := json.Marshal(logData)
 
-		_, err = s.Write(logDataJSON)
+		_, err := s.Write(logDataJSON)
 		if err != nil {
 			t.Fatal("Cannot write message to host")
 		}
