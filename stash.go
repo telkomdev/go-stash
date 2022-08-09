@@ -61,7 +61,7 @@ func SetReadTimeout(readTimeout time.Duration) Option {
 // SetWriteTimeout Option func
 func SetWriteTimeout(writeTimeout time.Duration) Option {
 	return func(o *options) {
-		o.readTimeout = writeTimeout
+		o.writeTimeout = writeTimeout
 	}
 }
 
