@@ -9,7 +9,6 @@ import (
 )
 
 var (
-
 	// CRLF (Carriage Return and Line Feed in ASCII code)
 	CRLF = []byte{13, 10}
 )
