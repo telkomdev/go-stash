@@ -181,9 +181,9 @@ func (s *Stash) Write(data []byte) (int, error) {
 			if err != nil {
 				log.Printf("go-stash: %s | do re dial\n", err.Error())
 			}
+		} else {
+			return 0, err
 		}
-
-		return 0, err
 	}
 	return len(data), nil
 }
