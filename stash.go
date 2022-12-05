@@ -4,8 +4,15 @@ import (
 	"bytes"
 	"crypto/tls"
 	"fmt"
+	"log"
 	"net"
+	"strings"
 	"time"
+)
+
+const (
+	// BrokenPipeError const type to check whether the write process to tcp is broken
+	BrokenPipeError = "broken pipe"
 )
 
 var (
@@ -22,6 +29,7 @@ type Stash struct {
 	conn         net.Conn
 	readTimeout  time.Duration
 	writeTimeout time.Duration
+	o            *options
 	address      string
 }
 
@@ -79,29 +87,15 @@ func SetTLSConfig(config *tls.Config) Option {
 	}
 }
 
-// Connect function, this function will connect to logstash server
-func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
-	address := fmt.Sprintf("%s:%d", host, port)
-
-	s := &Stash{address: address}
-
-	o := &options{
-		dialer: &net.Dialer{
-			KeepAlive: time.Minute * 5,
-		},
-	}
-	for _, option := range opts {
-		option(o)
-	}
-
+func (s *Stash) dial(address string, o *options) error {
 	addr, err := net.ResolveTCPAddr("tcp", address)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	conn, err := net.DialTCP("tcp", nil, addr)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	s.conn = conn
@@ -120,7 +114,7 @@ func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
 			host, _, err := net.SplitHostPort(s.address)
 			if err != nil {
 				conn.Close()
-				return nil, err
+				return err
 			}
 			tlsConfig.ServerName = host
 		}
@@ -128,11 +122,34 @@ func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
 		tlsConn := tls.Client(conn, tlsConfig)
 		if err := tlsConn.Handshake(); err != nil {
 			conn.Close()
-			return nil, err
+			return err
 		}
 
 		// replace current Conn object with tlsConn
 		s.conn = tlsConn
+	}
+
+	return nil
+}
+
+// Connect function, this function will connect to logstash server
+func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
+	address := fmt.Sprintf("%s:%d", host, port)
+
+	s := &Stash{address: address}
+
+	o := &options{
+		dialer: &net.Dialer{
+			KeepAlive: time.Minute * 5,
+		},
+	}
+	for _, option := range opts {
+		option(o)
+	}
+
+	s.o = o
+	if err := s.dial(address, o); err != nil {
+		return nil, err
 	}
 
 	s.readTimeout = o.readTimeout
@@ -157,6 +174,15 @@ func (s *Stash) Write(data []byte) (int, error) {
 	// write data to Connection
 	_, err := s.conn.Write(data)
 	if err != nil {
+		if strings.Contains(err.Error(), BrokenPipeError) {
+			log.Printf("go-stash: %s | do re dial\n", err.Error())
+			// re dial ignore error
+			err = s.dial(s.address, s.o)
+			if err != nil {
+				log.Printf("go-stash: %s | do re dial\n", err.Error())
+			}
+		}
+
 		return 0, err
 	}
 	return len(data), nil
