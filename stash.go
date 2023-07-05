@@ -142,6 +142,8 @@ func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
 		dialer: &net.Dialer{
 			KeepAlive: time.Minute * 5,
 		},
+		writeTimeout: 30 * time.Second,
+		readTimeout:  30 * time.Second,
 	}
 	for _, option := range opts {
 		option(o)
