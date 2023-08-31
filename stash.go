@@ -165,7 +165,7 @@ func (s *Stash) Write(data []byte) (int, error) {
 		deadline := time.Now().Add(s.writeTimeout)
 		s.conn.SetWriteDeadline(deadline)
 	}
-
+	origPLen := len(data)
 	// remove any Carriage Return or Line Feed in bytes data
 	// before concate with new Carriage Return and Line Feed
 	data = bytes.Trim(data, string(CRLF))
@@ -187,7 +187,9 @@ func (s *Stash) Write(data []byte) (int, error) {
 			return 0, err
 		}
 	}
-	return len(data), nil
+
+	return origPLen, nil
+	// return len(data), nil
 }
 
 // Close function, will close connection
