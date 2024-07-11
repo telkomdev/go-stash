@@ -15,10 +15,8 @@ const (
 	BrokenPipeError = "broken pipe"
 )
 
-var (
-	// CRLF (Carriage Return and Line Feed in ASCII code)
-	CRLF = []byte{13, 10}
-)
+// CRLF (Carriage Return and Line Feed in ASCII code)
+var CRLF = []byte{13, 10}
 
 func addCRLF(data []byte) []byte {
 	return append(data, CRLF...)
@@ -38,6 +36,7 @@ type Option func(*options)
 
 type options struct {
 	dialer       *net.Dialer
+	protocol     string
 	useTLS       bool
 	skipVerify   bool
 	readTimeout  time.Duration
@@ -87,13 +86,16 @@ func SetTLSConfig(config *tls.Config) Option {
 	}
 }
 
-func (s *Stash) dial(address string, o *options) error {
-	addr, err := net.ResolveTCPAddr("tcp", address)
-	if err != nil {
-		return err
+// SetProtocolConn Option func
+// set protocol connection between logstash : `tcp` or `udp`
+func SetProtocolConn(protocol string) Option {
+	return func(o *options) {
+		o.protocol = protocol
 	}
+}
 
-	conn, err := net.DialTCP("tcp", nil, addr)
+func (s *Stash) dial(address string, o *options) error {
+	conn, err := net.Dial(o.protocol, address)
 	if err != nil {
 		return err
 	}
@@ -142,6 +144,7 @@ func Connect(host string, port uint64, opts ...Option) (*Stash, error) {
 		dialer: &net.Dialer{
 			KeepAlive: time.Minute * 5,
 		},
+		protocol:     "tcp",
 		writeTimeout: 30 * time.Second,
 		readTimeout:  30 * time.Second,
 	}
