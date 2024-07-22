@@ -105,7 +105,6 @@ func SetProtocolConn(protocol string) Option {
 func (s *Stash) dial(address string) error {
 	conn, err := s.o.dialer.Dial(s.o.protocol, address)
 	if err != nil {
-		conn.Close()
 		return err
 	}
 
